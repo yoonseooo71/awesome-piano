@@ -1,7 +1,7 @@
 const theme = {
   colors : {
     background : "black",
-    pianoBackground : "white",
+    pianoBox : "white",
     C : "#FF0000",
     D : "#FFA500", 
     E : "#FFFF00",
