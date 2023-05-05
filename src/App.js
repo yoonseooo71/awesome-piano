@@ -1,6 +1,10 @@
 import styled from "styled-components";
 import sound from "./audio/sound";
+import { useState } from "react";
+import { useRef } from "react";
+import { useEffect } from "react";
 function App() {
+  const [moveKeys,setMoveKeys] = useState([]); 
   const pianoKeyEvent = { //키별 계이름 
     's':'C',
     'd':'D',
@@ -11,26 +15,45 @@ function App() {
     'k':'B',
     'l':'highC'
   }
-  const playSound = (e)=>{ //키입력시 피아노소리 출력
-    if (e.key in pianoKeyEvent) { //입력한 키가 사용할키인지 확인
-      const audio = new Audio(sound[pianoKeyEvent[e.key]]); //audio 생성 
-      audio.volume=0.5; //소리크기 조절 
-      audio.play(); //audio 재생
-    }
+  const keysDom = {
+    C : useRef(),
+    D : useRef(),
+    E : useRef(),
+    F : useRef(),
+    G : useRef(),
+    A : useRef(),
+    B : useRef(),
+    highC : useRef()
   }
-  window.addEventListener("keydown",playSound); //브라우저 키입력 이벤트 
-  
+  useEffect(()=>{ //이벤트가 발생하면 state를 사용해 랜더링이되며 이벤트가 재생성되서 그걸 막기위해 useEffect 사용
+    
+    const playSound = (e)=>{ //키입력시 피아노소리 출력
+      if (e.repeat) return;
+      else if (e.key in pianoKeyEvent) { //입력한 키가 사용할키인지 확인
+        const audio = new Audio(sound[pianoKeyEvent[e.key]]); //audio 생성 
+        audio.volume=0.5; //소리크기 조절 
+        audio.play()
+        setMoveKeys(moveKeys=>[...moveKeys,<MovePianoKey key={moveKeys.length} type={pianoKeyEvent[e.key]} left={`${keysDom[pianoKeyEvent[e.key]].current.offsetLeft}px`}/>])// 이동하는 에니메이션 요소 추가
+      }
+    }
+    window.addEventListener("keydown",playSound); //브라우저 키입력 이벤트 
+    return ()=>{
+      window.removeEventListener("keydown",playSound);
+    }
+  },[])
+  console.log(moveKeys)
   return (
     <Wrapper>
       <PianoBox >
-        <PianoKey type="C"/>
-        <PianoKey type="D"/>
-        <PianoKey type="E"/>
-        <PianoKey type="F"/>
-        <PianoKey type="G"/>
-        <PianoKey type="A"/>
-        <PianoKey type="B"/>
-        <PianoKey type="highC"/>
+        <PianoKey type="C" ref={keysDom.C}/>
+        <PianoKey type="D" ref={keysDom.D}/>
+        <PianoKey type="E" ref={keysDom.E}/>
+        <PianoKey type="F" ref={keysDom.F}/>
+        <PianoKey type="G" ref={keysDom.G}/>
+        <PianoKey type="A" ref={keysDom.A}/>
+        <PianoKey type="B" ref={keysDom.B}/>
+        <PianoKey type="highC" ref={keysDom.highC}/>
+        {moveKeys}
       </PianoBox>
     </Wrapper>
   );
@@ -58,6 +81,8 @@ const PianoBox = styled.main`
   justify-content: space-between;
   align-items: center;
   padding: 30px 70px;
+  position: relative;
+  z-index: 1;
 `
 const PianoKey = styled.div`
   width: 100px;
@@ -65,6 +90,10 @@ const PianoKey = styled.div`
   border-radius: 50px;
   background-color: ${({theme,type})=>theme.colors[type]};
 `
-
+const MovePianoKey = styled(PianoKey)`
+  position: absolute;
+  z-index: 10;
+  left: ${({left})=> left};
+`
 export default App;
 
