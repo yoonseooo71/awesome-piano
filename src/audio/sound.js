@@ -6,7 +6,7 @@ import G from "../audio/G.mp3";
 import A from "../audio/A.mp3";
 import B from "../audio/B.mp3";
 import highC from "../audio/highC.mp3";
-const sound = { //all sound file export 
+const sounds = { //all sound file export 
   C,
   D,
   E,
@@ -16,4 +16,4 @@ const sound = { //all sound file export
   B,
   highC
 }
-export default sound ;
+export default sounds ;

@@ -1,11 +1,11 @@
 import styled from "styled-components";
-import sound from "./audio/sound";
+import sounds from "./audio/sound";
 import { useState } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
 function App() {
   const [moveKeys,setMoveKeys] = useState([]); 
-  const pianoKeyEvent = { //키별 계이름 
+  const changeKey = { //키별 계이름 
     's':'C',
     'd':'D',
     'f':'E',
@@ -25,22 +25,26 @@ function App() {
     B : useRef(),
     highC : useRef()
   }
+  const playSound = (sound) => { //소리출력하는 함수
+    const audio = new Audio(sound); //audio 생성 
+    audio.volume=0.5; //소리크기 조절 
+    audio.play()
+  }
+  const keyDownHandler = (e)=>{ //키입력시 피아노소리 출력
+    if (e.repeat) return; //키누르는중 중복 이벤트 발생
+    else if (e.key in changeKey) { //입력한 키가 사용할키인지 확인
+      playSound(sounds[changeKey[e.key]]);
+      const clientRect = keysDom[changeKey[e.key]].current.getBoundingClientRect(); //요소위치값 가져오기
+      setMoveKeys(moveKeys=> [...moveKeys,<MovePianoKey key={moveKeys.length} type={changeKey[e.key]} top={clientRect.top} left={clientRect.left}/>])// 이동하는 에니메이션 요소 추가
+      console.log(moveKeys);
+    }
+  }
   useEffect(()=>{ //이벤트가 발생하면 state를 사용해 랜더링이되며 이벤트가 재생성되서 그걸 막기위해 useEffect 사용
-    const playSound = (e)=>{ //키입력시 피아노소리 출력
-      if (e.repeat) return;
-      else if (e.key in pianoKeyEvent) { //입력한 키가 사용할키인지 확인
-        const audio = new Audio(sound[pianoKeyEvent[e.key]]); //audio 생성 
-        audio.volume=0.5; //소리크기 조절 
-        audio.play()
-        const clientRect = keysDom[pianoKeyEvent[e.key]].current.getBoundingClientRect();
-        setMoveKeys(moveKeys=> [...moveKeys,<MovePianoKey key={moveKeys.length} type={pianoKeyEvent[e.key]} top={clientRect.top} left={clientRect.left} />])// 이동하는 에니메이션 요소 추가
-      }
-    }
-    window.addEventListener("keydown",playSound); //브라우저 키입력 이벤트 
+    window.addEventListener("keydown",keyDownHandler); //브라우저 키입력 이벤트 
     return ()=>{
-      window.removeEventListener("keydown",playSound);
+      window.removeEventListener("keydown",keyDownHandler);
     }
-  },[moveKeys,setMoveKeys])
+  },[keyDownHandler])
   return (
     <Wrapper>
       <PianoBox >
