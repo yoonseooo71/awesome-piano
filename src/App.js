@@ -6,11 +6,7 @@ import { useRef } from "react";
 import { useEffect } from "react";
 function App() {
   const [moveKeys,setMoveKeys] = useState([]); 
-  const moveKeysRef = useRef([]);  
-  const setMoveKeysRef = (data)=>{
-    moveKeysRef.current = data ; 
-    setMoveKeys(data) ; 
-  }
+  const moveKeysRef = useRef([]); // effect에서 state값을바꾸어도 느리게 적용되에서 사용함
   const changeKey = { //키별 계이름 
     's':'C',
     'd':'D',
@@ -31,14 +27,18 @@ function App() {
     B : useRef(),
     highC : useRef()
   }
+  const setMoveKeysRef = (data)=>{ //state 와 Ref.current 에 값을 한번에 넣는 함수 
+    moveKeysRef.current = data ; 
+    setMoveKeys(data) ; 
+  }
   const playSound = (sound) => { //소리출력하는 함수
     const audio = new Audio(sound); //audio 생성 
     audio.volume=0.5; //소리크기 조절 
     audio.play()
   }
-  const animationEndHandler = (event) => {
-    const filterMoveKeys = moveKeysRef.current.filter((element)=>element.props.id !== event.target.id); 
-    setMoveKeysRef(filterMoveKeys);
+  const animationEndHandler = (event) => { //요소 에니메이션 끝났을때 함수
+    const filterMoveKeys = moveKeysRef.current.filter((element)=>element.props.id !== event.target.id); //유니크 id값을사용하여 id가 같은 요소를 제거 
+    setMoveKeysRef(filterMoveKeys); 
   }
   const keyDownHandler = (e)=>{ //키입력시 피아노소리 출력
     if (e.repeat) return; //키누르는중 중복 이벤트 발생
