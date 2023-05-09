@@ -4,67 +4,64 @@ import { v4 as uuidv4 } from 'uuid';
 import { useState } from "react";
 import { useRef } from "react";
 import { useEffect } from "react";
+import { useCallback } from "react";
 function App() {
   const [moveKeys,setMoveKeys] = useState([]); 
   const moveKeysRef = useRef([]); // effect에서 state값을바꾸어도 느리게 적용되에서 사용함
-  const changeKey = { //키별 계이름 
-    's':'C',
-    'd':'D',
-    'f':'E',
-    'g':'F',
-    'h':'G',
-    'j':'A',
-    'k':'B',
-    'l':'highC'
-  }
-  const keysDom = {
-    C : useRef(),
-    D : useRef(),
-    E : useRef(),
-    F : useRef(),
-    G : useRef(),
-    A : useRef(),
-    B : useRef(),
-    highC : useRef()
-  }
-  const setMoveKeysRef = (data)=>{ //state 와 Ref.current 에 값을 한번에 넣는 함수 
+  const keysDom = useRef({}) ; 
+  const setMoveKeysRef = useCallback((data)=>{ //state 와 Ref.current 에 값을 한번에 넣는 함수 
     moveKeysRef.current = data ; 
     setMoveKeys(data) ; 
-  }
-  const playSound = (sound) => { //소리출력하는 함수
+  },[setMoveKeys])
+
+  const playSound = useCallback((sound) => { //소리출력하는 함수
     const audio = new Audio(sound); //audio 생성 
     audio.volume=0.5; //소리크기 조절 
     audio.play()
-  }
-  const animationEndHandler = (event) => { //요소 에니메이션 끝났을때 함수
+  },[])
+
+  const animationEndHandler = useCallback((event) => { //요소 에니메이션 끝났을때 함수
     const filterMoveKeys = moveKeysRef.current.filter((element)=>element.props.id !== event.target.id); //유니크 id값을사용하여 id가 같은 요소를 제거 
     setMoveKeysRef(filterMoveKeys); 
-  }
-  const keyDownHandler = (e)=>{ //키입력시 피아노소리 출력
+  },[setMoveKeysRef])
+
+  const keyDownHandler = useCallback((e)=>{ //키입력시 피아노소리 출력 
+    const changeKey = { //키별 계이름 
+      's':'C',
+      'd':'D',
+      'f':'E',
+      'g':'F',
+      'h':'G',
+      'j':'A',
+      'k':'B',
+      'l':'highC'
+    }
     if (e.repeat) return; //키누르는중 중복 이벤트 발생
     else if (e.key in changeKey) { //입력한 키가 사용할키인지 확인
       playSound(sounds[changeKey[e.key]]);
-      const clientRect = keysDom[changeKey[e.key]].current.getBoundingClientRect(); //요소위치값 가져오기
+      const clientRect = keysDom.current[changeKey[e.key]].getBoundingClientRect(); //요소위치값 가져오기
       setMoveKeysRef([...moveKeysRef.current,<MovePianoKey id={uuidv4()} key={uuidv4()} type={changeKey[e.key]} top={clientRect.top} left={clientRect.left} onAnimationEnd={animationEndHandler}/>])// 이동하는 에니메이션 요소 추가
     }
-  }
+  },[playSound,setMoveKeysRef,keysDom,animationEndHandler]) 
+
   useEffect(()=>{ //이벤트가 발생하면 state를 사용해 랜더링이되며 이벤트가 재생성되서 그걸 막기위해 useEffect 사용
     window.addEventListener("keydown",keyDownHandler); //브라우저 키입력 이벤트 
     return ()=>{
       window.removeEventListener("keydown",keyDownHandler);
     }
   },[keyDownHandler])
+
   return (
     <Wrapper>
       <PianoBox >
-        <PianoKey type="C" ref={keysDom.C}/>
-        <PianoKey type="D" ref={keysDom.D}/>
-        <PianoKey type="E" ref={keysDom.E}/>
-        <PianoKey type="F" ref={keysDom.F}/>
-        <PianoKey type="G" ref={keysDom.G}/>
-        <PianoKey type="A" ref={keysDom.A}/>
-        <PianoKey type="B" ref={keysDom.B}/>
-        <PianoKey type="highC" ref={keysDom.highC}/>
+        <PianoKey type="C" ref={(el)=>keysDom.current['C']=el}/>
+        <PianoKey type="D" ref={(el)=>keysDom.current['D']=el}/>
+        <PianoKey type="E" ref={(el)=>keysDom.current['E']=el}/>
+        <PianoKey type="F" ref={(el)=>keysDom.current['F']=el}/>
+        <PianoKey type="G" ref={(el)=>keysDom.current['G']=el}/>
+        <PianoKey type="A" ref={(el)=>keysDom.current['A']=el}/>
+        <PianoKey type="B" ref={(el)=>keysDom.current['B']=el}/>
+        <PianoKey type="highC" ref={(el)=>keysDom.current['highC']=el}/>
         {moveKeys}
       </PianoBox>
     </Wrapper>
