@@ -8,7 +8,7 @@ import { useCallback } from "react";
 function App() {
   const [moveKeys,setMoveKeys] = useState([]); 
   const moveKeysRef = useRef([]); // effect에서 state값을바꾸어도 느리게 적용되에서 사용함
-  const keysDom = useRef({}) ; 
+  const keysDom = useRef({}) ; //Ref를 여러개사용하기위해 current 값에 오브젝트를 넣어줌
   const setMoveKeysRef = useCallback((data)=>{ //state 와 Ref.current 에 값을 한번에 넣는 함수 
     moveKeysRef.current = data ; 
     setMoveKeys(data) ; 
@@ -36,11 +36,13 @@ function App() {
       'k':'B',
       'l':'highC'
     }
+    const inputKey = e.key.toLowerCase() ;
     if (e.repeat) return; //키누르는중 중복 이벤트 발생
-    else if (e.key in changeKey) { //입력한 키가 사용할키인지 확인
-      playSound(sounds[changeKey[e.key]]);
-      const clientRect = keysDom.current[changeKey[e.key]].getBoundingClientRect(); //요소위치값 가져오기
-      setMoveKeysRef([...moveKeysRef.current,<MovePianoKey id={uuidv4()} key={uuidv4()} type={changeKey[e.key]} top={clientRect.top} left={clientRect.left} onAnimationEnd={animationEndHandler}/>])// 이동하는 에니메이션 요소 추가
+    else if (inputKey in changeKey) { //입력한 키가 사용할키인지 확인
+      const sound = changeKey[inputKey];
+      playSound(sounds[sound]);
+      const clientRect = keysDom.current[sound].getBoundingClientRect(); //요소위치값 가져오기
+      setMoveKeysRef([...moveKeysRef.current,<MovePianoKey id={uuidv4()} key={uuidv4()} type={sound} top={clientRect.top} left={clientRect.left} onAnimationEnd={animationEndHandler}/>])// 이동하는 에니메이션 요소 추가
     }
   },[playSound,setMoveKeysRef,keysDom,animationEndHandler]) 
 
