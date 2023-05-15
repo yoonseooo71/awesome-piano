@@ -5,6 +5,7 @@
 > + HTML
 > + CSS
 > + JavaScript
+> + TypeScript
 > + React
 > + StyledComponent
 > + uuid
